@@ -7,13 +7,14 @@
 #include "DieWithError.h"
 
 
-#define RCVBUFSIZE 32   /* Size of receive buffer */
+#define RCVBUFSIZE 4200   /* Size of receive buffer */
 
 void DieWithError(char *errorMessage);  /* Error handling function */
 
 int main(int argc, char *argv[])
 {
     int sock;                        /* Socket descriptor */
+    int option;
     struct sockaddr_in echoServAddr; /* Echo server address */
     unsigned short echoServPort;     /* Echo server port */
     char *servIP;                    /* Server IP address (dotted quad) */
@@ -33,14 +34,17 @@ int main(int argc, char *argv[])
     servIP = argv[1];             /* First arg: server IP address (dotted quad) */
     echoString = argv[2];         /* Second arg: string to echo */
     
-    if (argc == 4)
+    if (argc == 4){
         echoServPort = atoi(argv[3]); /* Use given port, if any */
-    else
+    }
+    else {
         echoServPort = 7;  /* 7 is the well-known port for the echo service */
+    }
     
     /* Create a reliable, stream socket using TCP */
-    if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
+    if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
         DieWithError("socket() failed");
+    }
     
     /* Construct the server address structure */
     memset(&echoServAddr, 0, sizeof(echoServAddr));     /* Zero out structure */
@@ -48,15 +52,43 @@ int main(int argc, char *argv[])
     echoServAddr.sin_addr.s_addr = inet_addr(servIP);   /* Server IP address */
     echoServAddr.sin_port        = htons(echoServPort); /* Server port */
 
+    //Grab user input and search query
+    while(option != 3) 
+    {
+        printf("1. Get all news\n");
+        printf("2. Search for a keyword in today's news\n");
+        printf("3. Quit\n");
+        printf("Please enter your choice: ");
+        scanf("%d",&option);
+        
+        if(option == 1)
+        {
+            strcpy(echoBuffer, "#allnews");
+        }
+        else if(option == 2)
+        {
+            printf("Enter the term you wish to search for in today's news: ");
+            scanf("%s", echoBuffer);
+            printf("%s %ld\n", echoBuffer, strlen(echoBuffer));
+
+        }
+        else
+        {
+            exit(0);
+        }
+    }
+
     /* Establish the connection to the echo server */
-    if (connect(sock, (struct sockaddr *) &echoServAddr, sizeof(echoServAddr)) < 0)
+    if (connect(sock, (struct sockaddr *) &echoServAddr, sizeof(echoServAddr)) < 0) {
         DieWithError("connect() failed");
+    }
     
     echoStringLen = strlen(echoString);          /* Determine input length */
     
     /* Send the string to the server */
-    if (send(sock, echoString, echoStringLen, 0) != echoStringLen)
+    if (send(sock, echoString, echoStringLen, 0) != echoStringLen) {
         DieWithError("send() sent a different number of bytes than expected");
+    }
     
     /* Receive the same string back from the server */
     totalBytesRcvd = 0;
@@ -65,8 +97,9 @@ int main(int argc, char *argv[])
     {
         /* Receive up to the buffer size (minus 1 to leave space for
            a null terminator) bytes from the sender */
-        if ((bytesRcvd = recv(sock, echoBuffer, RCVBUFSIZE - 1, 0)) <= 0)
+        if ((bytesRcvd = recv(sock, echoBuffer, RCVBUFSIZE - 1, 0)) <= 0) {
             DieWithError("recv() failed or connection closed prematurely");
+        }
         totalBytesRcvd += bytesRcvd;   /* Keep tally of total bytes */
         echoBuffer[bytesRcvd] = '\0';  /* Terminate the string! */
         printf("%s", echoBuffer);      /* Print the echo buffer */
