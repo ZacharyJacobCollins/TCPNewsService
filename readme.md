@@ -18,3 +18,5 @@ Snippets located here: http://cs.ecs.baylor.edu/~donahoo/practical/CSockets/code
 I used github.com/awbradle as a reference for program architecting
 
 Additionally I utilized various stackoverflow posts for help with c syntax, and a programming in C book for help with c syntax
+
+Beejs guide to network programming http://beej.us/guide/bgnet/

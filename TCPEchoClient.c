@@ -4,10 +4,11 @@
 #include <stdlib.h>     /* for atoi() and exit() */
 #include <string.h>     /* for memset() */
 #include <unistd.h>     /* for close() */
+#include <time.h>
 #include "DieWithError.h"
 
 
-#define RCVBUFSIZE 4200   /* Size of receive buffer */
+#define RCVBUFSIZE 4096 /* Size of receive buffer */
 
 void DieWithError(char *errorMessage);  /* Error handling function */
 
@@ -81,7 +82,8 @@ int main(int argc, char *argv[])
             /* Receive the same string back from the server */
             totalBytesRcvd = 0;
             printf("Received: ");                /* Setup to print the echoed string */
-            while (totalBytesRcvd < echoStringLen)
+            // while (totalBytesRcvd < echoStringLen)
+            while (1)
             {
                 /* Receive up to the buffer size (minus 1 to leave space for
                    a null terminator) bytes from the sender */
@@ -110,7 +112,8 @@ int main(int argc, char *argv[])
             /* Receive the same string back from the server */
             totalBytesRcvd = 0;
             printf("Received: ");                /* Setup to print the echoed string */
-            while (totalBytesRcvd < echoStringLen)
+            // while (totalBytesRcvd < echoStringLen)
+            while (1)
             {
                 /* Receive up to the buffer size (minus 1 to leave space for
                    a null terminator) bytes from the sender */

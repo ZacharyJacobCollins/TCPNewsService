@@ -2,7 +2,7 @@
 #include <sys/socket.h> /* for recv() and send() */
 #include <unistd.h>     /* for close() */
 
-#define RCVBUFSIZE 4209   /* Size of receive buffer */
+#define RCVBUFSIZE 4096   /* Size of receive buffer */
 
 void DieWithError(char *errorMessage);  /* Error handling function */
 
@@ -18,11 +18,13 @@ void HandleTCPClient(int clntSocket)
     char searchTerm[RCVBUFSIZE];
 
     int recvMsgSize;                    /* Size of received message */
+
     
     /* Receive message from client */
     if ((recvMsgSize = recv(clntSocket, echoBuffer, RCVBUFSIZE, 0)) < 0) {
         DieWithError("recv() failed");
     }
+    echoBuffer[recvMsgSize] = '\0';
 
        /* Store search term in variable */
     strcpy(searchTerm,echoBuffer);
@@ -30,14 +32,26 @@ void HandleTCPClient(int clntSocket)
     /* retrieve and send all news */
     if( strcmp(searchTerm, "allnews")==0 ) {
         printf("Retrieving all news\n");
-        printf("hit");
 
         while (1)
         {
-            fgets(echoBuffer,4209,filepointer);
+            fgets(echoBuffer,4096,filepointer);
             if(feof(filepointer)|| strlen(echoBuffer)< 1)
             {
-                break;
+                break;  
+    /* Send received string and receive again until end of transmission */
+    while (recvMsgSize > 0)      /* zero indicates end of transmission */
+    {
+        /* Echo message back to client */
+        if (send(clntSocket, echoBuffer, recvMsgSize, 0) != recvMsgSize) {
+            DieWithError("send() failed");
+        }
+        
+        /* See if there is more data to receive */
+        if ((recvMsgSize = recv(clntSocket, echoBuffer, RCVBUFSIZE, 0)) < 0) {
+            DieWithError("recv() failed");
+        }
+    }
             }
             /* Echo message back to client */
             if(strstr(echoBuffer, "#item"))
@@ -95,21 +109,7 @@ void HandleTCPClient(int clntSocket)
                 break;
             }
         } 
-    }
-    
-    /* Send received string and receive again until end of transmission */
-    while (recvMsgSize > 0)      /* zero indicates end of transmission */
-    {
-        /* Echo message back to client */
-        if (send(clntSocket, echoBuffer, recvMsgSize, 0) != recvMsgSize) {
-            DieWithError("send() failed");
-        }
-        
-        /* See if there is more data to receive */
-        if ((recvMsgSize = recv(clntSocket, echoBuffer, RCVBUFSIZE, 0)) < 0) {
-            DieWithError("recv() failed");
-        }
-    }
+    } 
     
     close(clntSocket);    /* Close client socket */
 }
