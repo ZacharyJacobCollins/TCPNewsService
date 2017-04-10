@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     int bytesRcvd, totalBytesRcvd;   /* Bytes read in single recv()
                                         and total bytes read */
     
-    if ((argc < 3) || (argc > 4))    /* Test for correct number of arguments */
+    if ((argc < 2) || (argc > 3))    /* Test for correct number of arguments */
     {
        fprintf(stderr, "Usage: %s <Server IP> <Echo Word> [<Echo Port>]\n",
                argv[0]);
@@ -32,10 +32,10 @@ int main(int argc, char *argv[])
     }
     
     servIP = argv[1];             /* First arg: server IP address (dotted quad) */
-    echoString = argv[2];         /* Second arg: string to echo */
+    echoString = argv[2];         /* Initialize echo string with garbo */
     
-    if (argc == 4){
-        echoServPort = atoi(argv[3]); /* Use given port, if any */
+    if (argc == 3){
+        echoServPort = atoi(argv[2]); /* Use given port, if any */
     }
     else {
         echoServPort = 7;  /* 7 is the well-known port for the echo service */
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     while(option != 3) 
     {
         printf("1. Get all news\n");
-        printf("2. Search for a keyword in today's news\n");
+        printf("2. Search for a keyword in 04-09-2017 news\n");
         printf("3. Quit\n");
         printf("Please enter your choice: ");
         scanf("%d",&option);
@@ -93,15 +93,37 @@ int main(int argc, char *argv[])
                 printf("%s", echoBuffer);      /* Print the echo buffer */
             }
             printf("\n");    /* Print a final linefeed */
-            
+
         }
         else if(option == 2)
         {
             printf("Enter a search term: ");
             scanf("%s", echoString);
+
+            echoStringLen = strlen(echoString);          /* Determine input length */
+    
+            /* Send the string to the server */
+            if (send(sock, echoString, echoStringLen, 0) != echoStringLen) {
+                DieWithError("send() sent a different number of bytes than expected");
+            }
+            
+            /* Receive the same string back from the server */
+            totalBytesRcvd = 0;
+            printf("Received: ");                /* Setup to print the echoed string */
+            while (totalBytesRcvd < echoStringLen)
+            {
+                /* Receive up to the buffer size (minus 1 to leave space for
+                   a null terminator) bytes from the sender */
+                if ((bytesRcvd = recv(sock, echoBuffer, RCVBUFSIZE - 1, 0)) <= 0) {
+                    DieWithError("recv() failed or connection closed prematurely");
+                }
+                totalBytesRcvd += bytesRcvd;   /* Keep tally of total bytes */
+                echoBuffer[bytesRcvd] = '\0';  /* Terminate the string  */
+                printf("%s", echoBuffer);      /* Print the echo buffer */
+            }
+            printf("\n");    /* Print a final linefeed */
+            
             // printf("%s %ld\n", echoBuffer, strlen(echoBuffer));
-
-
         }
         else
         {
@@ -109,8 +131,6 @@ int main(int argc, char *argv[])
         }
     }
 
- 
-    
     close(sock);
     exit(0);
 }

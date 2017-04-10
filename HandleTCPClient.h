@@ -57,8 +57,44 @@ void HandleTCPClient(int clntSocket)
         }
     /* We're looking for a specific news piece, grab that piece and send it back */
     } else {
-        printf("Searching for %s\n", searchTerm);
-        
+       printf("Searching for %s\n", searchTerm);
+       while(1)
+        {
+        fgetpos(filepointer,&temp);
+            fgets(echoBuffer, 4096,filepointer);
+            if(strstr(echoBuffer, "#item"))
+            {
+                firstline = temp;
+                fgets(echoBuffer, 4096,filepointer);
+            }
+            if(strstr(echoBuffer, searchTerm))
+            {
+                fsetpos(filepointer, &firstline);
+                fgets(echoBuffer, 4096,filepointer);
+                while(strlen(echoBuffer) > 1 && !feof(filepointer))
+                {
+                    if(strstr(echoBuffer, "#item"))
+                    {
+                        echoBuffer[0] = 'i';
+                        echoBuffer[1] = 't';
+                        echoBuffer[2] = 'e';
+                        echoBuffer[3] = 'm';
+                        echoBuffer[4] = ':';
+                        send(clntSocket, echoBuffer, strlen(echoBuffer), 0);
+                    }
+                    else
+                    {
+                        send(clntSocket, echoBuffer, strlen(echoBuffer), 0);
+                    }
+                    fgets(echoBuffer, 4096,filepointer);
+                }
+            
+            }
+        if(feof(filepointer))
+            {
+                break;
+            }
+        } 
     }
     
     /* Send received string and receive again until end of transmission */
