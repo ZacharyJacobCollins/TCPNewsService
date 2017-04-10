@@ -52,60 +52,64 @@ int main(int argc, char *argv[])
     echoServAddr.sin_addr.s_addr = inet_addr(servIP);   /* Server IP address */
     echoServAddr.sin_port        = htons(echoServPort); /* Server port */
 
-    //Grab user input and search query
-    // while(option != 3) 
-    // {
-    //     printf("1. Get all news\n");
-    //     printf("2. Search for a keyword in today's news\n");
-    //     printf("3. Quit\n");
-    //     printf("Please enter your choice: ");
-    //     scanf("%d",&option);
-        
-    //     if(option == 1)
-    //     {
-    //         strcpy(echoBuffer, "#allnews");
-    //     }
-    //     else if(option == 2)
-    //     {
-    //         printf("Enter the term you wish to search for in today's news: ");
-    //         scanf("%s", echoBuffer);
-    //         printf("%s %ld\n", echoBuffer, strlen(echoBuffer));
-
-    //     }
-    //     else
-    //     {
-    //         exit(0);
-    //     }
-    // }
-
 
     /* Establish the connection to the echo server */
     if (connect(sock, (struct sockaddr *) &echoServAddr, sizeof(echoServAddr)) < 0) {
         DieWithError("connect() failed");
     }
-    
-    echoStringLen = strlen(echoString);          /* Determine input length */
-    
-    /* Send the string to the server */
-    if (send(sock, echoString, echoStringLen, 0) != echoStringLen) {
-        DieWithError("send() sent a different number of bytes than expected");
-    }
-    
-    /* Receive the same string back from the server */
-    totalBytesRcvd = 0;
-    printf("Received: ");                /* Setup to print the echoed string */
-    while (totalBytesRcvd < echoStringLen)
+
+
+
+    while(option != 3) 
     {
-        /* Receive up to the buffer size (minus 1 to leave space for
-           a null terminator) bytes from the sender */
-        if ((bytesRcvd = recv(sock, echoBuffer, RCVBUFSIZE - 1, 0)) <= 0) {
-            DieWithError("recv() failed or connection closed prematurely");
+        printf("1. Get all news\n");
+        printf("2. Search for a keyword in today's news\n");
+        printf("3. Quit\n");
+        printf("Please enter your choice: ");
+        scanf("%d",&option);
+        
+        if(option == 1)
+        {
+            strcpy(echoString, "allnews");
+            echoStringLen = strlen(echoString);          /* Determine input length */
+    
+            /* Send the string to the server */
+            if (send(sock, echoString, echoStringLen, 0) != echoStringLen) {
+                DieWithError("send() sent a different number of bytes than expected");
+            }
+            
+            /* Receive the same string back from the server */
+            totalBytesRcvd = 0;
+            printf("Received: ");                /* Setup to print the echoed string */
+            while (totalBytesRcvd < echoStringLen)
+            {
+                /* Receive up to the buffer size (minus 1 to leave space for
+                   a null terminator) bytes from the sender */
+                if ((bytesRcvd = recv(sock, echoBuffer, RCVBUFSIZE - 1, 0)) <= 0) {
+                    DieWithError("recv() failed or connection closed prematurely");
+                }
+                totalBytesRcvd += bytesRcvd;   /* Keep tally of total bytes */
+                echoBuffer[bytesRcvd] = '\0';  /* Terminate the string  */
+                printf("%s", echoBuffer);      /* Print the echo buffer */
+            }
+            printf("\n");    /* Print a final linefeed */
+            
         }
-        totalBytesRcvd += bytesRcvd;   /* Keep tally of total bytes */
-        echoBuffer[bytesRcvd] = '\0';  /* Terminate the string  */
-        printf("%s", echoBuffer);      /* Print the echo buffer */
+        else if(option == 2)
+        {
+            printf("Enter a search term: ");
+            scanf("%s", echoString);
+            // printf("%s %ld\n", echoBuffer, strlen(echoBuffer));
+
+
+        }
+        else
+        {
+            exit(0);
+        }
     }
-    printf("\n");    /* Print a final linefeed */
+
+ 
     
     close(sock);
     exit(0);
