@@ -2,7 +2,7 @@
 #include <sys/socket.h> /* for recv() and send() */
 #include <unistd.h>     /* for close() */
 
-#define RCVBUFSIZE 4096   /* Size of receive buffer */
+#define RCVBUFSIZE 4200   /* Size of receive buffer */
 
 void DieWithError(char *errorMessage);  /* Error handling function */
 
@@ -35,23 +35,10 @@ void HandleTCPClient(int clntSocket)
 
         while (1)
         {
-            fgets(echoBuffer,4096,filepointer);
+            fgets(echoBuffer,4200,filepointer);
             if(feof(filepointer)|| strlen(echoBuffer)< 1)
             {
                 break;  
-    /* Send received string and receive again until end of transmission */
-    while (recvMsgSize > 0)      /* zero indicates end of transmission */
-    {
-        /* Echo message back to client */
-        if (send(clntSocket, echoBuffer, recvMsgSize, 0) != recvMsgSize) {
-            DieWithError("send() failed");
-        }
-        
-        /* See if there is more data to receive */
-        if ((recvMsgSize = recv(clntSocket, echoBuffer, RCVBUFSIZE, 0)) < 0) {
-            DieWithError("recv() failed");
-        }
-    }
             }
             /* Echo message back to client */
             if(strstr(echoBuffer, "#item"))
@@ -75,16 +62,16 @@ void HandleTCPClient(int clntSocket)
        while(1)
         {
         fgetpos(filepointer,&temp);
-            fgets(echoBuffer, 4096,filepointer);
+            fgets(echoBuffer, 4200,filepointer);
             if(strstr(echoBuffer, "#item"))
             {
                 firstline = temp;
-                fgets(echoBuffer, 4096,filepointer);
+                fgets(echoBuffer, 4200,filepointer);
             }
             if(strstr(echoBuffer, searchTerm))
             {
                 fsetpos(filepointer, &firstline);
-                fgets(echoBuffer, 4096,filepointer);
+                fgets(echoBuffer, 4200,filepointer);
                 while(strlen(echoBuffer) > 1 && !feof(filepointer))
                 {
                     if(strstr(echoBuffer, "#item"))
@@ -100,7 +87,7 @@ void HandleTCPClient(int clntSocket)
                     {
                         send(clntSocket, echoBuffer, strlen(echoBuffer), 0);
                     }
-                    fgets(echoBuffer, 4096,filepointer);
+                    fgets(echoBuffer, 4200,filepointer);
                 }
             
             }

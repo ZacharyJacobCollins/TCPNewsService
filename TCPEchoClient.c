@@ -8,7 +8,7 @@
 #include "DieWithError.h"
 
 
-#define RCVBUFSIZE 4096 /* Size of receive buffer */
+#define RCVBUFSIZE 4200/* Size of receive buffer */
 
 void DieWithError(char *errorMessage);  /* Error handling function */
 
@@ -59,79 +59,78 @@ int main(int argc, char *argv[])
         DieWithError("connect() failed");
     }
 
-
-
-    while(option != 3) 
+    printf("1. Get all news\n");
+    printf("2. Search for a keyword in 04-09-2017 news\n");
+    printf("3. Quit\n");
+    printf("Please enter your choice: ");
+    scanf("%d",&option);
+    
+    if(option == 1)
     {
-        printf("1. Get all news\n");
-        printf("2. Search for a keyword in 04-09-2017 news\n");
-        printf("3. Quit\n");
-        printf("Please enter your choice: ");
-        scanf("%d",&option);
+        strcpy(echoString, "allnews");
+        echoStringLen = strlen(echoString);          /* Determine input length */
+
+        /* Send the string to the server */
+        if (send(sock, echoString, echoStringLen, 0) != echoStringLen) {
+            DieWithError("send() sent a different number of bytes than expected");
+        }
         
-        if(option == 1)
+        /* Receive the same string back from the server */
+        totalBytesRcvd = 0;
+        printf("Received: ");                /* Setup to print the echoed string */
+        while (1)
         {
-            strcpy(echoString, "allnews");
-            echoStringLen = strlen(echoString);          /* Determine input length */
-    
-            /* Send the string to the server */
-            if (send(sock, echoString, echoStringLen, 0) != echoStringLen) {
-                DieWithError("send() sent a different number of bytes than expected");
+            /* Receive up to the buffer size (minus 1 to leave space for
+               a null terminator) bytes from the sender */
+            if ((bytesRcvd = recv(sock, echoBuffer, RCVBUFSIZE - 1, 0)) <= 0) {
+                printf("done");
+                break;
             }
-            
-            /* Receive the same string back from the server */
-            totalBytesRcvd = 0;
-            printf("Received: ");                /* Setup to print the echoed string */
-            // while (totalBytesRcvd < echoStringLen)
-            while (1)
-            {
-                /* Receive up to the buffer size (minus 1 to leave space for
-                   a null terminator) bytes from the sender */
-                if ((bytesRcvd = recv(sock, echoBuffer, RCVBUFSIZE - 1, 0)) <= 0) {
-                    DieWithError("recv() failed or connection closed prematurely");
-                }
-                totalBytesRcvd += bytesRcvd;   /* Keep tally of total bytes */
-                echoBuffer[bytesRcvd] = '\0';  /* Terminate the string  */
-                printf("%s", echoBuffer);      /* Print the echo buffer */
-            }
-            printf("\n");    /* Print a final linefeed */
+            totalBytesRcvd += bytesRcvd;   /* Keep tally of total bytes */
+            echoBuffer[bytesRcvd] = '\0';  /* Terminate the string  */
+            printf("%s", echoBuffer);      /* Print the echo buffer */
+        }
+        // printf("\n");    /* Print a final linefeed */
+        // printf("1. Get all news\n");
+        // printf("2. Search for a keyword in 04-09-2017 news\n");
+        // printf("3. Quit\n");
+        // printf("Please enter your choice: ");
+        // scanf("%d",&option);
+        exit(0);
+    }
+    else if(option == 2)
+    {
+        printf("Enter a search term: ");
+        scanf("%s", echoString);
 
-        }
-        else if(option == 2)
-        {
-            printf("Enter a search term: ");
-            scanf("%s", echoString);
+        echoStringLen = strlen(echoString);          /* Determine input length */
 
-            echoStringLen = strlen(echoString);          /* Determine input length */
-    
-            /* Send the string to the server */
-            if (send(sock, echoString, echoStringLen, 0) != echoStringLen) {
-                DieWithError("send() sent a different number of bytes than expected");
-            }
-            
-            /* Receive the same string back from the server */
-            totalBytesRcvd = 0;
-            printf("Received: ");                /* Setup to print the echoed string */
-            // while (totalBytesRcvd < echoStringLen)
-            while (1)
-            {
-                /* Receive up to the buffer size (minus 1 to leave space for
-                   a null terminator) bytes from the sender */
-                if ((bytesRcvd = recv(sock, echoBuffer, RCVBUFSIZE - 1, 0)) <= 0) {
-                    DieWithError("recv() failed or connection closed prematurely");
-                }
-                totalBytesRcvd += bytesRcvd;   /* Keep tally of total bytes */
-                echoBuffer[bytesRcvd] = '\0';  /* Terminate the string  */
-                printf("%s", echoBuffer);      /* Print the echo buffer */
-            }
-            printf("\n");    /* Print a final linefeed */
-            
-            // printf("%s %ld\n", echoBuffer, strlen(echoBuffer));
+        /* Send the string to the server */
+        if (send(sock, echoString, echoStringLen, 0) != echoStringLen) {
+            DieWithError("send() sent a different number of bytes than expected");
         }
-        else
+        
+        /* Receive the same string back from the server */
+        totalBytesRcvd = 0;
+        printf("Received: ");                /* Setup to print the echoed string */
+        while (1)
         {
-            exit(0);
+            /* Receive up to the buffer size (minus 1 to leave space for
+               a null terminator) bytes from the sender */
+            if ((bytesRcvd = recv(sock, echoBuffer, RCVBUFSIZE - 1, 0)) <= 0) {
+                printf("done");
+                break;
+            }
+            totalBytesRcvd += bytesRcvd;   /* Keep tally of total bytes */
+            echoBuffer[bytesRcvd] = '\0';  /* Terminate the string  */
+            printf("%s", echoBuffer);      /* Print the echo buffer */
         }
+        printf("\n");    /* Print a final linefeed */
+        exit(0);
+    }
+    else
+    {
+        exit(0);
     }
 
     close(sock);
