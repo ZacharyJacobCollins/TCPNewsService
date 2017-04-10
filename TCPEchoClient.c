@@ -53,30 +53,31 @@ int main(int argc, char *argv[])
     echoServAddr.sin_port        = htons(echoServPort); /* Server port */
 
     //Grab user input and search query
-    while(option != 3) 
-    {
-        printf("1. Get all news\n");
-        printf("2. Search for a keyword in today's news\n");
-        printf("3. Quit\n");
-        printf("Please enter your choice: ");
-        scanf("%d",&option);
+    // while(option != 3) 
+    // {
+    //     printf("1. Get all news\n");
+    //     printf("2. Search for a keyword in today's news\n");
+    //     printf("3. Quit\n");
+    //     printf("Please enter your choice: ");
+    //     scanf("%d",&option);
         
-        if(option == 1)
-        {
-            strcpy(echoBuffer, "#allnews");
-        }
-        else if(option == 2)
-        {
-            printf("Enter the term you wish to search for in today's news: ");
-            scanf("%s", echoBuffer);
-            printf("%s %ld\n", echoBuffer, strlen(echoBuffer));
+    //     if(option == 1)
+    //     {
+    //         strcpy(echoBuffer, "#allnews");
+    //     }
+    //     else if(option == 2)
+    //     {
+    //         printf("Enter the term you wish to search for in today's news: ");
+    //         scanf("%s", echoBuffer);
+    //         printf("%s %ld\n", echoBuffer, strlen(echoBuffer));
 
-        }
-        else
-        {
-            exit(0);
-        }
-    }
+    //     }
+    //     else
+    //     {
+    //         exit(0);
+    //     }
+    // }
+
 
     /* Establish the connection to the echo server */
     if (connect(sock, (struct sockaddr *) &echoServAddr, sizeof(echoServAddr)) < 0) {
@@ -101,10 +102,9 @@ int main(int argc, char *argv[])
             DieWithError("recv() failed or connection closed prematurely");
         }
         totalBytesRcvd += bytesRcvd;   /* Keep tally of total bytes */
-        echoBuffer[bytesRcvd] = '\0';  /* Terminate the string! */
+        echoBuffer[bytesRcvd] = '\0';  /* Terminate the string  */
         printf("%s", echoBuffer);      /* Print the echo buffer */
     }
-    
     printf("\n");    /* Print a final linefeed */
     
     close(sock);
