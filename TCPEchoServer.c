@@ -63,5 +63,4 @@ int main(int argc, char *argv[])
          
         HandleTCPClient(clntSock);
     }
-    /* NOT REACHED */
 }

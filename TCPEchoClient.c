@@ -59,10 +59,10 @@ int main(int argc, char *argv[])
         DieWithError("connect() failed");
     }
 
-    printf("1. Get all news\n");
-    printf("2. Search for a keyword in 04-09-2017 news\n");
-    printf("3. Quit\n");
-    printf("Please enter your choice: ");
+    printf("| 1 |  Get all news\n");
+    printf("| 2 |  Search for a keyword in 04-09-2017 news\n");
+    printf("| 3 |  Exit client\n");
+    printf("Select an option: ");
     scanf("%d",&option);
     
     if(option == 1)
@@ -78,24 +78,18 @@ int main(int argc, char *argv[])
         /* Receive the same string back from the server */
         totalBytesRcvd = 0;
         printf("Received: ");                /* Setup to print the echoed string */
-        while (1)
+        for(;;)
         {
             /* Receive up to the buffer size (minus 1 to leave space for
                a null terminator) bytes from the sender */
             if ((bytesRcvd = recv(sock, echoBuffer, RCVBUFSIZE - 1, 0)) <= 0) {
-                printf("done");
+                printf("\n Enjoy your news!");
                 break;
             }
             totalBytesRcvd += bytesRcvd;   /* Keep tally of total bytes */
             echoBuffer[bytesRcvd] = '\0';  /* Terminate the string  */
             printf("%s", echoBuffer);      /* Print the echo buffer */
-        }
-        // printf("\n");    /* Print a final linefeed */
-        // printf("1. Get all news\n");
-        // printf("2. Search for a keyword in 04-09-2017 news\n");
-        // printf("3. Quit\n");
-        // printf("Please enter your choice: ");
-        // scanf("%d",&option);
+        }   
         exit(0);
     }
     else if(option == 2)
@@ -113,7 +107,7 @@ int main(int argc, char *argv[])
         /* Receive the same string back from the server */
         totalBytesRcvd = 0;
         printf("Received: ");                /* Setup to print the echoed string */
-        while (1)
+        for(;;)
         {
             /* Receive up to the buffer size (minus 1 to leave space for
                a null terminator) bytes from the sender */

@@ -33,15 +33,16 @@ void HandleTCPClient(int clntSocket)
     if( strcmp(searchTerm, "allnews")==0 ) {
         printf("Retrieving all news\n");
 
-        while (1)
+        for(;;)
         {
+            //read from stream
             fgets(echoBuffer,4200,filepointer);
+            //Make sure we don't overstep our bounds here check eof
             if(feof(filepointer)|| strlen(echoBuffer)< 1)
             {
                 break;  
             }
-            /* Echo message back to client */
-            if(strstr(echoBuffer, "#item"))
+            if(strcmp(searchTerm, "#item")==0)
             {
                 echoBuffer[0] = '#';
                 echoBuffer[1] = 'i';
@@ -59,19 +60,24 @@ void HandleTCPClient(int clntSocket)
     /* We're looking for a specific news piece, grab that piece and send it back */
     } else {
        printf("Searching for %s\n", searchTerm);
-       while(1)
+        for(;;)
         {
         fgetpos(filepointer,&temp);
             fgets(echoBuffer, 4200,filepointer);
+            //Find occurence of #item
             if(strstr(echoBuffer, "#item"))
             {
                 firstline = temp;
                 fgets(echoBuffer, 4200,filepointer);
             }
+            //Find occurence of search term
             if(strstr(echoBuffer, searchTerm))
             {
+                //stream
                 fsetpos(filepointer, &firstline);
+                //read from stream
                 fgets(echoBuffer, 4200,filepointer);
+                //Make sure we don't overstep our bounds here check eof
                 while(strlen(echoBuffer) > 1 && !feof(filepointer))
                 {
                     if(strstr(echoBuffer, "#item"))
